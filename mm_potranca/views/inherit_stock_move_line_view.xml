@@ -1,0 +1,25 @@
+<odoo>
+    <data>
+        <record id="view_stock_move_line_inherit_tree" model="ir.ui.view">
+            <field name="name">stock.move.line.inherit.tree</field>
+            <field name="model">stock.move.line</field>
+            <field name="inherit_id" ref="stock.view_move_line_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//tree//field[@name='reference']" position="after">
+                    <field name="references" string="Referencia/Razón de inventario"/>
+                </xpath>
+            </field>
+        </record>
+        
+        <record id="view_stock_move_line_inherit_form" model="ir.ui.view">
+            <field name="name">stock.move.line.inherit.form</field>
+            <field name="model">stock.move.line</field>
+            <field name="inherit_id" ref="stock.view_move_line_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//form//field[@name='reference']" position="after">
+                    <field name="references" string="Referencia/Razón de inventario"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,5 @@
+# -*- coding: utf-8 -*-
+
+#import sale
+import partner
+import partner_credit_rule

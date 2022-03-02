@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="mm_timbrado_poss" model="ir.cron">
+        <field name="name">Timbrado POS</field>
+        <field name="model_id" ref="account.model_account_move_line"/>
+        <field name="state">code</field>
+        <field name="code">
+facturas = env['account.move'].search([('l10n_mx_edi_cfdi_uuid','=',False),('journal_id.name','=','POS')])
+for fac in facturas:
+    fac.action_process_edi_web_services()
+        </field>
+        <field name="interval_number">30</field>
+        <field name="interval_type">minutes</field>
+        <field name="numbercall">-1</field>
+        <field name="doall" eval="False"/>
+        <field name="active" eval="True" />
+    </record>
+
+    <record id="mm_etiquetas_auto" model="base.automation">
+        <field name="name">cambioEtiqueta</field>
+        <field name="active">1</field>
+        <field name="state">code</field>
+        <field name="model_id" ref="account.model_account_move"/>
+        <field name="trigger">on_create_or_write</field>
+        <field name="code">
+if record.invoice_origin:
+  vent = env['sale.order'].search([('name', '=', record.invoice_origin)])
+  comp = env['purchase.order'].search([('name', '=', record.invoice_origin)])
+  if vent:
+    tt = vent.user_id.analytic_tag_ids_sale
+    aa = vent.user_id.analytic_account_id.id
+    ttid = []
+    for anali in tt:
+      ttid.append(anali.id)
+    for invo in record.invoice_line_ids:
+      invo.write({'analytic_account_id': vent.user_id.analytic_account_id.id})
+      invo.write({'analytic_tag_ids': [(6, 0, ttid)]})
+  elif comp:
+    tt = comp.user_id.analytic_tag_ids_purchase
+    aa = comp.user_id.analytic_account_id.id
+    ttid = []
+    for anali in tt:
+      ttid.append(anali.id)
+    for invo in record.invoice_line_ids:
+      invo.write({'analytic_account_id': comp.user_id.analytic_account_id.id})
+      invo.write({'analytic_tag_ids': [(6, 0, ttid)]})
+        </field>
+    </record>
+
+    <record id="mm_intercompanias" model="base.automation">
+        <field name="name">interCompanias</field>
+        <field name="active">1</field>
+        <field name="state">code</field>
+        <field name="model_id" ref="base.model_res_company"/>
+        <field name="trigger">on_create</field>
+        <field name="code">
+if record.inter_company == True:
+    company = env['res.partner'].search([('name', '=', record.name)])
+    price_list = env['product.pricelist'].search([('id','=',2)])
+    if company:
+        company.write({'property_product_pricelist': price_list.id})
+        </field>
+    </record>
+    
+    <record id="mm_diario_contable" model="base.automation">
+        <field name="name">DiarioContable</field>
+        <field name="active">1</field>
+        <field name="state">code</field>
+        <field name="model_id" ref="account.model_account_move"/>
+        <field name="trigger">on_create</field>
+        <field name="code">
+#diario 11
+veri = record.invoice_origin
+if veri is False:
+  veri = 'a'
+else:
+  orde = env['stock.picking'].search([('origin', '=', record.invoice_origin)])
+  if not orde:
+    a='b'
+  else:
+    order = orde[0]
+    if order.origin is False:
+      location = 'a'
+    else:
+      name = order.origin[0]
+      pos = order.pos_session_id.id
+      pos_st = str(pos)
+
+      if pos_st.isnumeric():
+        location = 'a'
+      else:
+        if name == 'P':
+          ids = record.id
+          #moveline = env['account.move.line'].search([('name', 'ilike', veri), ('move_id', '=', ids)])[0]
+          purchase = env['purchase.order'].search([('name', '=', record.invoice_origin)])
+          #raise Warning(purchase.picking_type_id.default_location_dest_id.diario_compra.name)
+          record.write({'journal_id': purchase.picking_type_id.default_location_dest_id.diario_compra.id})
+
+        else:
+          sale = env['sale.order'].search([('name', '=', veri)])
+          #cambiar dato
+          location = env['stock.location'].search([('id', '=', order.location_id.id)])
+          #raise Warning('order' + str(order))
+          picc = env['stock.picking'].search([('origin', '=', sale.name), ])
+          if picc:
+            pick = picc[0]
+          record.write({'journal_id': location.diario_venta.id})
+
+        </field>
+    </record>
+    
+    <record id="mm_cambio_almacen" model="base.automation">
+        <field name="name">cambioalm</field>
+        <field name="active">1</field>
+        <field name="state">code</field>
+        <field name="model_id" ref="sale.model_sale_order"/>
+        <field name="trigger">on_change</field>
+        <field name="on_change_field_ids" eval="[(6,0,[5630])]"/>
+        <field name="code">
+#almacen 10
+user = record.user_id.id
+bus = env['crm.team'].search([('member_ids', 'in', user)])[0]
+nn = 'Almacén ' + (bus.name).capitalize()
+alm = env['stock.warehouse'].search([('name', '=', nn)])
+if alm:
+  record.update({'warehouse_id': alm[0].id})
+        </field>
+    </record>
+
+</odoo>
