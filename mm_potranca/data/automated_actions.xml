@@ -127,15 +127,4 @@ if alm:
         </field>
     </record>
 
-    <record id="nombre_factura" model="base.automation">
-        <field name="name">nombreFactura</field>
-        <field name="active">1</field>
-        <field name="state">code</field>
-        <field name="model_id" ref="account.model_account_move"/>
-        <field name="trigger">on_create</field>
-        <field name="code">
-record.write({'name': '/'})
-        </field>
-    </record>
-
 </odoo>
