@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="account_invoice_report_view_tree_mm" model="ir.ui.view">
+        <field name="name">account.invoice.report.view.tree.mm</field>
+        <field name="model">account.invoice.report</field>
+        <field name="inherit_id" ref="account.account_invoice_report_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//tree//field[@name='move_type']" position="after">
+                <field name="x_studio_lnea_de_producto" optional="hide"/>
+                <field name="x_studio_laboratorios_marcas" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+    
+    
+    <record id="view_account_invoice_report_search_mm" model="ir.ui.view">
+        <field name="name">account.invoice.report.search.mm</field>
+        <field name="model">account.invoice.report</field>
+        <field name="inherit_id" ref="account.view_account_invoice_report_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search//group//filter[@name='status']" position="after">
+                <field name="x_studio_lnea_de_producto" context="{'group_by':'x_studio_lnea_de_producto'}"/>
+                <field name="x_studio_laboratorios_marcas" context="{'group_by':'x_studio_laboratorios_marcas'}"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

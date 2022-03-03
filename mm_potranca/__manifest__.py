@@ -33,5 +33,6 @@
         'views/inherit_stock_location.xml',
         'views/inherit_stock_move_line_view.xml',
         'data/automated_actions.xml',
+        'report/inherit_account_invoice_report_views.xml',
     ],
 }
